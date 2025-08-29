@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { getValor } from "../../services/fipeService";
 import BuscaMarca from "../../components/organisms/BuscaMarca";
 import BuscaModelo from "../../components/organisms/BuscaModelo";
