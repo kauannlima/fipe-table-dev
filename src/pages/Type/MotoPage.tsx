@@ -1,26 +1,99 @@
-import React, { useState } from 'react'
-import MarcaDropdown from '../../components/organisms/MarcaDropdown'
+import React, { useState, useEffect } from "react";
+import { getValor } from "../../services/fipeService";
+import BuscaMarca from "../../components/organisms/BuscaMarca";
+import BuscaModelo from "../../components/organisms/BuscaModelo";
+import BuscaAno from "../../components/organisms/BuscaAno";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/molecules/card";
 
 const MotoPage = () => {
-  const [marcaSelecionada, setMarcaSelecionada] = useState("")
+  const [marcaSelecionada, setMarcaSelecionada] = useState("");
+  const [modeloSelecionado, setModeloSelecionado] = useState("");
+  const [anoSelecionado, setAnoSelecionado] = useState("");
+  const [resultado, setResultado] = useState<any | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchValor = async () => {
+      if (marcaSelecionada && modeloSelecionado && anoSelecionado) {
+        setLoading(true);
+        const data = await getValor(
+          "motos",
+          Number(marcaSelecionada),
+          Number(modeloSelecionado),
+          anoSelecionado
+        );
+        setResultado(data);
+        setLoading(false);
+      }
+    };
+    fetchValor();
+  }, [marcaSelecionada, modeloSelecionado, anoSelecionado]);
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-      <h1 className="text-2xl font-bold mb-6 text-center">Consulta FIPE - Motos</h1>
+    <div className="max-w-xl mx-auto mt-32 p-2 space-y-6">
+      <Card className="shadow-lg p-6">
+        <CardHeader>
+          <CardTitle className="text-2xl text-center font-bold text-green-500">
+           Motos
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <BuscaMarca
+            tipoVeiculo="motos"
+            value={marcaSelecionada}
+            onChange={(value) => {
+              setMarcaSelecionada(value);
+              setModeloSelecionado("");
+              setAnoSelecionado("");
+              setResultado(null);
+            }}
+          />
 
-      <MarcaDropdown
-        tipoVeiculo="motos"
-        value={marcaSelecionada}
-        onChange={setMarcaSelecionada}
-      />
+          <BuscaModelo
+            tipoVeiculo="motos"
+            codMarca={marcaSelecionada}
+            value={modeloSelecionado}
+            onChange={(value) => {
+              setModeloSelecionado(value);
+              setAnoSelecionado("");
+              setResultado(null);
+            }}
+            disabled={!marcaSelecionada}
+          />
 
-      {marcaSelecionada && (
-        <p className="mt-4 text-center text-gray-700">
-          Marca selecionada: <strong>{marcaSelecionada}</strong>
-        </p>
-      )}
+          <BuscaAno
+            tipoVeiculo="motos"
+            codMarca={marcaSelecionada}
+            codModelo={modeloSelecionado}
+            value={anoSelecionado}
+            onChange={setAnoSelecionado}
+            disabled={!modeloSelecionado}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Card de resultado */}
+      <Card className="bg-white shadow-lg p-6 hover:shadow-2xl transition-shadow duration-300">
+        <CardHeader>
+          <CardTitle className="text-xl text-center font-semibold">
+            {loading
+              ? "Carregando informações..."
+              : resultado?.Modelo || " "}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <p><strong>Marca:</strong> {loading ? "..." : resultado?.Marca || "-"}</p>
+          <p><strong>Ano:</strong> {loading ? "..." : resultado?.AnoModelo || "-"}</p>
+          <p><strong>Combustível:</strong> {loading ? "..." : resultado?.Combustivel || "-"}</p>
+          <p><strong>Código FIPE:</strong> {loading ? "..." : resultado?.CodigoFipe || "-"}</p>
+          <p><strong>Preço:</strong> {loading ? "..." : resultado?.Valor || "-"}</p>
+          <p className="text-sm text-gray-500 text-center">
+            {loading ? "..." : `Referência: ${resultado?.MesReferencia || "-"}`}
+          </p>
+        </CardContent>
+      </Card>
     </div>
-  )
-}
+  );
+};
 
 export default MotoPage;
