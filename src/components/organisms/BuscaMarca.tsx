@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { getMarcas } from "../../services/fipeService"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../atoms/select"
 import { Label } from "../atoms/label"
